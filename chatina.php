@@ -46,6 +46,8 @@ class Chatina
         });
 
         add_filter('plugin_action_links', [$this, 'filter_plugin_action_links']);
+
+        add_action('admin_init', [$this, 'handle_chatina_requests']);
     }
 
     public function filter_plugin_action_links($links)
@@ -61,7 +63,36 @@ class Chatina
 
     public function chatina_page()
     {
-        include plugin_dir_path(__FILE__) . 'views/setting.php';
+        include_once plugin_dir_path(__FILE__) . 'views/setting.php';
+    }
+
+
+    public function handle_chatina_requests()
+    {
+        if (isset($_GET['apiKey']) && isset($_GET['_wpnonce'])) {
+            $_nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce']));
+            if (!wp_verify_nonce($_nonce, 'chatina_save_api_key')) {
+                wp_die('Security check');
+            }
+
+            $api_key = sanitize_text_field(wp_unslash($_GET['apiKey']));
+            update_option('chatina_api_key', $api_key);
+
+            wp_redirect(admin_url('admin.php?page=chatina&message=success'));
+            exit;
+        }
+
+        if (isset($_GET['disconnect']) && isset($_GET['_wpnonce'])) {
+            $_nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce']));
+            if (!wp_verify_nonce($_nonce, 'chatina_disconnect')) {
+                wp_die('Security check');
+            }
+
+            delete_option('chatina_api_key');
+
+            wp_redirect(admin_url('admin.php?page=chatina&message=success'));
+            exit;
+        }
     }
 
     function admin_assets()
@@ -74,8 +105,7 @@ class Chatina
 
     public static function register_assets()
     {
-        wp_enqueue_script('chatina', plugin_dir_url(__FILE__) . 'assets/js/widget.js', [], '1.0.0', ['in_footer' => true]);
-        wp_enqueue_style('chatina', plugin_dir_url(__FILE__) . 'assets/css/widget.css', [], '1.0.0');
+        wp_enqueue_script('chatina', plugin_dir_url(__FILE__) . 'assets/js/chatina.js', [], '1.0.0', true);
         wp_localize_script('chatina', 'chatina', [
             'bId' => sanitize_text_field(get_option('chatina_api_key')),
         ]);

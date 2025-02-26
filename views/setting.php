@@ -1,35 +1,7 @@
 <?php
+if (!defined('ABSPATH')) exit;
 
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-if (isset($_GET['apiKey']) && isset($_GET['_wpnonce'])) {
-    $_nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce']));
-    $api_key = sanitize_text_field(wp_unslash($_GET['apiKey']));
-    if (!wp_verify_nonce($_nonce, 'chatina_save_api_key')) {
-        wp_die('Security check');
-    }
-
-    $api_key = sanitize_text_field(wp_unslash($_GET['apiKey']));
-    update_option('chatina_api_key', $api_key);
-
-    header('Location: ' . admin_url('admin.php?page=chatina&message=success'));
-    exit;
-}
-
-if (isset($_GET['disconnect']) && isset($_GET['_wpnonce'])) {
-    $_nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce']));
-    if (!wp_verify_nonce($_nonce, 'chatina_disconnect')) {
-        wp_die('Security check');
-    }
-
-    delete_option('chatina_api_key');
-
-    header('Location: ' . admin_url('admin.php?page=chatina&message=success'));
-    exit;
-}
-$apiKey = get_option('chatina_api_key');
+$apiKey = get_option('chatina_api_key', '');
 ?>
 
 <div class="chatina mwtc_admin_settings_wrapper <?php echo esc_attr(is_rtl() ? 'mwtc-rtl' : 'mwtc-ltr'); ?>">

@@ -4,7 +4,7 @@
  * Plugin Name: Chatina Ai – Live Chat Online Platform
  * Plugin URI: https://chatina.ai/lab/wordpress/
  * Description: Add online chat to your website
- * Version: 2.0
+ * Version: 2.1
  * Author: Ertano
  * Author URI: https://ertano.com
  * License: GPLv2 or later
@@ -25,6 +25,7 @@ class Chatina
     public function __construct()
     {
         load_plugin_textdomain('chatina', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+        add_action('plugins_loaded', [$this, 'handleUpdater']);
 
         add_action('wp_footer', [$this, 'add_chatina_root']);
 
@@ -114,6 +115,24 @@ class Chatina
     public static function add_chatina_root()
     {
         echo '<div id="chatina-root"></div>';
+    }
+
+    public function handleUpdater()
+    {
+        include plugin_dir_path(__FILE__) . 'mihanwpUpdater.php';
+        $plugin_data = get_file_data(CHATINA_PLUGIN_FILE, array('Version' => 'Version'), false);
+        $plugin_version = $plugin_data['Version'];
+        
+        
+        $updaterArgs = [
+            'base_api_server' => 'https://mihanwp.com',
+            'license_key' => 'free',
+            'item_id' => 1152546,
+            'current_version' => $plugin_version,
+            'plugin_slug' => plugin_basename(CHATINA_PLUGIN_FILE),
+            'license_status' => true,
+        ];
+        mihanwpUpdater::init($updaterArgs);
     }
 }
 
